@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <!-- ── SEO ── -->
+  <title>Kalkulator Średniej Ważonej – darmowy kalkulator online</title>
+  <meta name="description" content="Darmowy kalkulator średniej ważonej online. Dodaj dowolne grupy wartości, ustaw wagi i oblicz wynik w czasie rzeczywistym. Idealny dla uczniów, studentów i nauczycieli."/>
+  <meta name="keywords" content="kalkulator średniej ważonej, średnia ważona, kalkulator online, oblicz średnią, wagi ocen"/>
+  <meta name="author" content="sredniawazona.com.pl"/>
+  <link rel="canonical" href="https://sredniawazona.com.pl/"/>
+
+  <!-- ── Open Graph ── -->
+  <meta property="og:type" content="website"/>
+  <meta property="og:title" content="Kalkulator Średniej Ważonej – darmowy kalkulator online"/>
+  <meta property="og:description" content="Oblicz średnią ważoną w kilka sekund. Dodaj grupy, wpisz wartości i wagi – wynik na bieżąco."/>
+  <meta property="og:url" content="https://sredniawazona.com.pl/"/>
+  <meta property="og:locale" content="pl_PL"/>
+
+  <!-- ── Structured data ── -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Kalkulator Średniej Ważonej",
+    "url": "https://sredniawazona.com.pl/",
+    "description": "Darmowy kalkulator średniej ważonej online.",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "All",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "PLN" },
+    "inLanguage": "pl"
+  }
+  </script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: #f5f4f0;
+      font-family: 'Georgia', 'Times New Roman', serif;
+      color: #2c2820;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .header { text-align: center; margin-bottom: 2rem; }
+    .header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.5rem, 4vw, 2.3rem);
+      font-weight: 700; color: #1a1612; letter-spacing: 0.03em;
+    }
+    .header p {
+      margin-top: 0.35rem; font-size: 0.78rem; color: #9a9080;
+      letter-spacing: 0.16em; text-transform: uppercase;
+    }
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #c8b89060, transparent);
+      margin: 0.8rem auto; max-width: 800px;
+    }
+
+    #groups { display: flex; flex-direction: column; gap: 1.2rem; max-width: 800px; margin: 0 auto; }
+
+    .group-card {
+      border-radius: 10px; padding: 1.3rem 1.5rem 1.4rem;
+      transition: box-shadow 0.2s; position: relative;
+      background: #ffffff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07), 0 2px 12px rgba(0,0,0,0.04);
+    }
+    .group-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.11); }
+
+    .group-header {
+      display: flex; align-items: center; flex-wrap: wrap;
+      gap: 0.6rem; margin-bottom: 1.1rem;
+    }
+    .group-label-input {
+      font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700;
+      background: transparent; border: none; border-bottom: 1px solid transparent;
+      color: inherit; width: 130px; transition: border-color 0.15s; padding-bottom: 1px;
+    }
+    .group-label-input:focus { outline: none; border-bottom-color: currentColor; }
+
+    .weight-group { display: flex; align-items: center; gap: 0.3rem; margin-left: 0.3rem; }
+    .weight-label { font-size: 0.7rem; color: #a09080; letter-spacing: 0.1em; }
+    .weight-input {
+      font-family: 'Source Code Pro', monospace; font-size: 0.88rem; font-weight: 600;
+      background: transparent; border: none; border-bottom: 2px dashed;
+      width: 62px; text-align: center; padding-bottom: 1px; transition: all 0.15s;
+      -moz-appearance: textfield; cursor: text;
+    }
+    .weight-input::-webkit-inner-spin-button { display: none; }
+    .weight-input:hover { background: rgba(0,0,0,0.03); border-radius: 3px 3px 0 0; }
+    .weight-input:focus { outline: none; background: rgba(0,0,0,0.06); border-radius: 3px 3px 0 0; border-bottom-style: solid; }
+    .weight-edit-hint { font-size: 0.6rem; color: #c0b090; }
+
+    .badge { border-radius: 20px; padding: 2px 9px; font-size: 0.68rem; letter-spacing: 0.08em; }
+
+    .group-stats { margin-left: auto; text-align: right; font-size: 0.76rem; color: #a09080; white-space: nowrap; }
+    .group-stats .num { font-family: 'Source Code Pro', monospace; font-size: 0.88rem; }
+
+    .remove-btn {
+      margin-left: 0.5rem; background: transparent; border: 1px solid #e0d8cc;
+      color: #c0b0a0; border-radius: 4px; width: 24px; height: 24px; cursor: pointer;
+      font-size: 0.9rem; display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s; flex-shrink: 0;
+    }
+    .remove-btn:hover { border-color: #e05050; color: #e05050; background: #e0505010; }
+
+    .values-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+      gap: 0.5rem;
+    }
+
+    .slot { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .slot-num {
+      font-size: 0.6rem; color: #c0b0a0;
+      font-family: 'Source Code Pro', monospace; height: 12px; line-height: 12px;
+    }
+    .val-input {
+      width: 100%; aspect-ratio: 1; text-align: center;
+      font-size: 1rem; font-family: 'Source Code Pro', monospace; font-weight: 600;
+      border-radius: 6px; cursor: text; transition: all 0.12s, transform 0.1s;
+    }
+    .val-input:focus { outline: none; transform: scale(1.08); }
+    .val-input.empty { background: #f8f6f2; border: 1px solid #e8e0d4; color: #c0b0a0; }
+    .val-input.filled {
+      background: var(--c-fill); border: 1px solid var(--c-border); color: var(--c-text);
+    }
+    .val-input.add-slot {
+      background: #faf8f4; border: 1px dashed #d8cfc4;
+      color: #c0b0a0; font-size: 1.3rem; font-weight: 300;
+    }
+    .val-input.add-slot:hover { border-color: #a09080; color: #806858; }
+    .val-input.invalid { background: #fff0f0 !important; border-color: #e08080 !important; color: #c05050 !important; }
+
+    .slot-dot { width: 5px; height: 5px; border-radius: 50%; transition: background 0.12s; }
+
+    #add-group-btn {
+      display: block; max-width: 800px; margin: 0.6rem auto 0; width: 100%;
+      background: #ffffff; border: 1.5px dashed #d8cfc4; color: #a09080;
+      border-radius: 10px; padding: 0.75rem; cursor: pointer;
+      font-family: 'Georgia', serif; font-size: 0.8rem; letter-spacing: 0.15em;
+      text-transform: uppercase; transition: all 0.15s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    #add-group-btn:hover { border-color: #8b6f4e; color: #6b4f2e; background: #fdf9f4; }
+
+    #result-panel {
+      max-width: 800px; margin: 1.4rem auto 0; border-radius: 10px;
+      padding: 1.4rem 1.8rem; display: flex; align-items: center;
+      justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+      background: #ffffff; border: 1px solid #e8e0d4;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
+    }
+    .result-left .result-label {
+      font-size: 0.7rem; color: #a09080; letter-spacing: 0.2em;
+      text-transform: uppercase; margin-bottom: 0.2rem;
+    }
+    .result-value {
+      font-family: 'Playfair Display', serif; font-weight: 700;
+      letter-spacing: -0.02em; transition: color 0.3s, font-size 0.2s;
+    }
+    .breakdown { display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-start; }
+    .breakdown-item { text-align: center; min-width: 54px; }
+    .breakdown-wlabel { font-size: 0.65rem; letter-spacing: 0.08em; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80px; }
+    .breakdown-avg { font-family: 'Source Code Pro', monospace; font-size: 0.95rem; color: #2c2820; }
+    .breakdown-weight { font-size: 0.6rem; color: #b0a090; }
+    .result-right { display: flex; flex-direction: column; align-items: flex-end; gap: 0.6rem; }
+
+    .clear-btn {
+      background: #f5f2ee; border: 1px solid #e0d8cc; color: #907860;
+      border-radius: 6px; padding: 0.4rem 1rem; cursor: pointer;
+      font-size: 0.74rem; letter-spacing: 0.1em; font-family: 'Georgia', serif;
+      transition: all 0.15s; white-space: nowrap;
+    }
+    .clear-btn:hover { background: #ece8e0; border-color: #c8b898; }
+
+    .weight-warning {
+      max-width: 800px; margin: 0.5rem auto 0; font-size: 0.71rem;
+      color: #c07828; text-align: center; letter-spacing: 0.04em; min-height: 1.2em;
+    }
+
+    @media (max-width: 520px) {
+      .values-grid { gap: 0.35rem; }
+      .val-input { font-size: 0.9rem; }
+      .group-card { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Kalkulator Średniej Ważonej</h1>
+  <p>Wpisz liczbę · Enter przeskakuje dalej · Tab zmienia grupę · ← → ↑ ↓ nawigacja</p>
+  <div class="divider"></div>
+</div>
+
+<div id="groups"></div>
+<button id="add-group-btn">+ Dodaj grupę</button>
+<div class="weight-warning" id="weight-warning"></div>
+<div id="result-panel">
+  <div class="result-left">
+    <div class="result-label">Średnia ważona</div>
+    <div class="result-value" style="font-size:2rem;color:#d0c8b8">—</div>
+  </div>
+</div>
+
+<script>
+const PALETTE = [
+  { color:"#b87820", bg:"#fff8ee", border:"#f0d090" },
+  { color:"#1878c8", bg:"#eef4ff", border:"#90b8f0" },
+  { color:"#188050", bg:"#eefff5", border:"#90ddb0" },
+  { color:"#c83030", bg:"#fff0f0", border:"#f0a090" },
+  { color:"#8830c8", bg:"#f8f0ff", border:"#c890f0" },
+  { color:"#b89010", bg:"#fffbee", border:"#e8d070" },
+  { color:"#108898", bg:"#eefcff", border:"#80d0e0" },
+  { color:"#c83090", bg:"#fff0f8", border:"#f090c8" },
+];
+function pal(i) { return PALETTE[i % PALETTE.length]; }
+
+// values: array of actual entered values only — no trailing "" sentinel
+let groups = [
+  { id: 0, label: "Grupa A", weight: 0.500, values: [] },
+  { id: 1, label: "Grupa B", weight: 0.300, values: [] },
+  { id: 2, label: "Grupa C", weight: 0.200, values: [] },
+];
+let nextId = 3;
+
+function isValidNumber(s) {
+  if (s === "" || s === "-" || s === ".") return false;
+  return !isNaN(parseFloat(s)) && isFinite(s);
+}
+
+function weightSum() {
+  return groups.reduce((s, g) => s + (parseFloat(g.weight) || 0), 0);
+}
+
+function groupStats(g) {
+  const valid = g.values.filter(isValidNumber).map(Number);
+  const count = valid.length;
+  const avg = count > 0 ? valid.reduce((a,b) => a+b, 0) / count : null;
+  return { count, avg };
+}
+
+function calcResult() {
+  let wSum = 0, wValSum = 0, hasAny = false;
+  groups.forEach(g => {
+    const { avg } = groupStats(g);
+    const w = parseFloat(g.weight) || 0;
+    if (avg !== null && w > 0) { hasAny = true; wValSum += avg * w; wSum += w; }
+  });
+  return (hasAny && wSum > 0) ? wValSum / wSum : null;
+}
+
+// ── RESULT UPDATE ─────────────────────────────────────────────
+function updateResult() {
+  const result = calcResult();
+  const panel = document.getElementById("result-panel");
+  const warnEl = document.getElementById("weight-warning");
+  const ws = weightSum();
+  const wsOk = Math.abs(ws - 1.0) < 0.001;
+  warnEl.textContent = (!wsOk && groups.length > 0)
+    ? `⚠ Suma wag wynosi ${ws.toFixed(3)} (zamiast 1.000). Wynik przeliczony względem sumy wag.` : "";
+
+  if (!result) {
+    panel.style.background = "#ffffff";
+    panel.style.borderColor = "#e8e0d4";
+    panel.style.boxShadow = "0 1px 4px rgba(0,0,0,0.06)";
+    panel.innerHTML = `
+      <div class="result-left">
+        <div class="result-label">Średnia ważona</div>
+        <div class="result-value" style="font-size:2rem;color:#d0c8b8">—</div>
+      </div>
+      <div class="result-right"><button class="clear-btn" onclick="clearAll()">Wyczyść wszystko</button></div>`;
+    return;
+  }
+
+  panel.style.background = "linear-gradient(135deg,#fffdf8,#fff8ee)";
+  panel.style.borderColor = "#e0c878";
+  panel.style.boxShadow = "0 2px 16px rgba(180,140,40,0.10)";
+
+  let bd = `<div class="breakdown">`;
+  groups.forEach(g => {
+    const { avg } = groupStats(g);
+    const p = pal(groups.indexOf(g));
+    if (avg !== null) bd += `
+      <div class="breakdown-item">
+        <div class="breakdown-wlabel" style="color:${p.color}" title="${g.label}">${g.label}</div>
+        <div class="breakdown-avg">${avg.toFixed(3)}</div>
+        <div class="breakdown-weight">× ${parseFloat(g.weight).toFixed(3)}</div>
+      </div>`;
+  });
+  bd += `</div>`;
+
+  panel.innerHTML = `
+    <div class="result-left">
+      <div class="result-label">Średnia ważona</div>
+      <div class="result-value" style="font-size:3rem;color:#8b6010">${result.toFixed(4)}</div>
+    </div>
+    ${bd}
+    <div class="result-right"><button class="clear-btn" onclick="clearAll()">Wyczyść wszystko</button></div>`;
+}
+
+// ── SLOT STYLE ────────────────────────────────────────────────
+function styleInput(input, val, p) {
+  input.classList.remove("add-slot", "invalid", "empty", "filled");
+  if (val === "") {
+    input.classList.add("empty");
+    input.style.removeProperty("--c-fill");
+    input.style.removeProperty("--c-border");
+    input.style.removeProperty("--c-text");
+  } else if (!isValidNumber(val)) {
+    input.classList.add("invalid");
+  } else {
+    input.classList.add("filled");
+    input.style.setProperty("--c-fill", p.bg);
+    input.style.setProperty("--c-border", p.border);
+    input.style.setProperty("--c-text", p.color);
+  }
+}
+
+// ── RENDER GROUP VALUES ───────────────────────────────────────
+// g.values holds real values only — no trailing "" sentinel.
+// The "+" slot is always rendered as a separate UI element at the end.
+function renderGroupValues(gid, focusTarget) {
+  const g = groups.find(g => g.id === gid);
+  if (!g) return;
+  const p = pal(groups.indexOf(g));
+  const container = document.getElementById(`values-${gid}`);
+  if (!container) return;
+
+  // Save focus
+  const focused = document.activeElement;
+  let focusedIdx = (focusTarget !== undefined) ? focusTarget : null;
+  if (focusedIdx === null && focused && focused.dataset && focused.dataset.gid == gid) {
+    focusedIdx = parseInt(focused.dataset.idx);
+  }
+
+  container.innerHTML = "";
+
+  // Render real value slots
+  g.values.forEach((val, idx) => {
+    container.appendChild(makeSlot(gid, idx, val, p));
+  });
+
+  // Always render "+" add slot at end (data-idx = g.values.length)
+  const addIdx = g.values.length;
+  const addSlot = document.createElement("div");
+  addSlot.className = "slot";
+
+  const addNum = document.createElement("div");
+  addNum.className = "slot-num";
+  addNum.textContent = "";
+
+  const addInput = document.createElement("input");
+  addInput.type = "text";
+  addInput.className = "val-input add-slot";
+  addInput.placeholder = "+";
+  addInput.readOnly = true;
+  addInput.dataset.gid = gid;
+  addInput.dataset.idx = addIdx;
+  addInput.tabIndex = -1;
+  addInput.addEventListener("click", () => addSlotToGroup(gid));
+  addInput.addEventListener("keydown", e => {
+    if (e.key === "Tab") { e.preventDefault(); handleTab(gid); }
+  });
+
+  const addDot = document.createElement("div");
+  addDot.className = "slot-dot";
+  addDot.style.background = "#e0d8cc";
+
+  addSlot.appendChild(addNum);
+  addSlot.appendChild(addInput);
+  addSlot.appendChild(addDot);
+  container.appendChild(addSlot);
+
+  // Restore focus
+  if (focusedIdx !== null) {
+    const clampedIdx = Math.min(Math.max(focusedIdx, 0), g.values.length - 1);
+    if (g.values.length === 0) {
+      // focus "+" slot if no values
+      addInput.focus();
+    } else {
+      const el = container.querySelector(`.val-input:not(.add-slot)[data-idx="${clampedIdx}"]`);
+      if (el) { el.focus(); el.select(); }
+    }
+  }
+
+  updateGroupStats(gid);
+}
+
+function makeSlot(gid, idx, val, p) {
+  const slot = document.createElement("div");
+  slot.className = "slot";
+
+  const num = document.createElement("div");
+  num.className = "slot-num";
+  num.textContent = idx + 1;
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.inputMode = "decimal";
+  input.className = "val-input";
+  input.dataset.gid = gid;
+  input.dataset.idx = idx;
+  input.value = val;
+  input.autocomplete = "off";
+  input.spellcheck = false;
+  styleInput(input, val, p);
+  input.style.caretColor = p.color;
+
+  input.addEventListener("keydown", e => handleKeyDown(e, gid, idx));
+  input.addEventListener("input",   e => handleValueInput(gid, idx, e.target.value));
+
+  const dot = document.createElement("div");
+  dot.className = "slot-dot";
+  dot.style.background = isValidNumber(val) ? p.color : "#e0d8cc";
+
+  slot.appendChild(num);
+  slot.appendChild(input);
+  slot.appendChild(dot);
+  return slot;
+}
+
+function addSlotToGroup(gid, focusNewSlot = true) {
+  const g = groups.find(g => g.id === gid);
+  if (!g) return;
+  g.values.push("");
+  const newIdx = g.values.length - 1;
+  renderGroupValues(gid, focusNewSlot ? newIdx : undefined);
+  updateGroupStats(gid);
+}
+
+// ── KEYDOWN ───────────────────────────────────────────────────
+function handleKeyDown(e, gid, idx) {
+  const key = e.key;
+  const g = groups.find(g => g.id === gid);
+
+  if (key === "Tab") { e.preventDefault(); handleTab(gid); return; }
+
+  if (key === "Enter") {
+    e.preventDefault();
+    // Insert new empty slot right after current, focus it
+    g.values.splice(idx + 1, 0, "");
+    renderGroupValues(gid, idx + 1);
+    updateResult();
+    return;
+  }
+
+  // Backspace on already-empty slot → delete it immediately
+  if (key === "Backspace" && g.values[idx] === "") {
+    e.preventDefault();
+    g.values.splice(idx, 1);
+    renderGroupValues(gid, Math.max(0, idx - 1));
+    updateResult();
+    return;
+  }
+
+  if (key === "ArrowLeft") {
+    e.preventDefault();
+    const container = document.getElementById(`values-${gid}`);
+    const prev = container.querySelector(`.val-input:not(.add-slot)[data-idx="${idx - 1}"]`);
+    if (prev) { prev.focus(); prev.select(); }
+    return;
+  }
+
+  if (key === "ArrowRight") {
+    e.preventDefault();
+    const container = document.getElementById(`values-${gid}`);
+    const next = container.querySelector(`.val-input:not(.add-slot)[data-idx="${idx + 1}"]`);
+    if (next) { next.focus(); next.select(); }
+    return;
+  }
+
+  if (key === "ArrowUp") {
+    e.preventDefault();
+    const gIdx = groups.findIndex(g => g.id === gid);
+    if (gIdx > 0) focusInGroup(groups[gIdx - 1].id, idx);
+    return;
+  }
+
+  if (key === "ArrowDown") {
+    e.preventDefault();
+    const gIdx = groups.findIndex(g => g.id === gid);
+    if (gIdx < groups.length - 1) focusInGroup(groups[gIdx + 1].id, idx);
+    return;
+  }
+}
+
+function focusInGroup(gid, preferredIdx) {
+  const container = document.getElementById(`values-${gid}`);
+  if (!container) return;
+  const inputs = container.querySelectorAll(".val-input:not(.add-slot)");
+  if (!inputs.length) return;
+  const clamped = Math.min(preferredIdx, inputs.length - 1);
+  const el = container.querySelector(`.val-input:not(.add-slot)[data-idx="${clamped}"]`);
+  if (el) { el.focus(); el.select(); }
+}
+
+// ── VALUE INPUT ───────────────────────────────────────────────
+function handleValueInput(gid, idx, rawVal) {
+  const g = groups.find(g => g.id === gid);
+  if (!g) return;
+
+  // Sanitize
+  let val = rawVal.replace(/[^0-9.\-]/g, "");
+  if (val.indexOf("-") > 0) val = val.replace(/-/g, "");
+  const parts = val.split(".");
+  if (parts.length > 2) val = parts[0] + "." + parts.slice(1).join("");
+
+  const container = document.getElementById(`values-${gid}`);
+  const input = container ? container.querySelector(`.val-input:not(.add-slot)[data-idx="${idx}"]`) : null;
+
+  // If value cleared → immediately remove this slot
+  if (val === "" && g.values.length > 1) {
+    g.values.splice(idx, 1);
+    renderGroupValues(gid, Math.max(0, idx - 1));
+    updateGroupStats(gid);
+    updateResult();
+    return;
+  }
+
+  // Update sanitized value in DOM if needed
+  if (input && input.value !== val) {
+    const pos = input.selectionStart;
+    input.value = val;
+    try { input.setSelectionRange(pos, pos); } catch(err) {}
+  }
+
+  g.values[idx] = val;
+
+  // Style in-place
+  if (input) {
+    const p = pal(groups.indexOf(g));
+    styleInput(input, val, p);
+    const dot = input.parentElement.querySelector(".slot-dot");
+    if (dot) dot.style.background = isValidNumber(val) ? p.color : "#e0d8cc";
+  }
+
+  updateGroupStats(gid);
+  updateResult();
+}
+
+// ── TAB ───────────────────────────────────────────────────────
+function handleTab(gid) {
+  const idx = groups.findIndex(g => g.id === gid);
+  const nextGroup = groups[(idx + 1) % groups.length];
+  // Always add a fresh empty slot to next group and focus it immediately
+  nextGroup.values.push("");
+  const newIdx = nextGroup.values.length - 1;
+  renderGroupValues(nextGroup.id, newIdx);
+}
+
+// ── GROUP STATS ───────────────────────────────────────────────
+function updateGroupStats(gid) {
+  const g = groups.find(g => g.id === gid);
+  if (!g) return;
+  const p = pal(groups.indexOf(g));
+  const el = document.getElementById(`stats-${gid}`);
+  if (!el) return;
+  const { count, avg } = groupStats(g);
+  el.innerHTML =
+    `<span class="num" style="color:${p.color}">${count}</span> wartości` +
+    (avg !== null ? ` &nbsp;·&nbsp; śr: <span class="num" style="color:${p.color}">${avg.toFixed(3)}</span>` : "");
+}
+
+// ── RENDER CARD ───────────────────────────────────────────────
+function renderGroupCard(g) {
+  const p = pal(groups.indexOf(g));
+  const card = document.createElement("div");
+  card.className = "group-card";
+  card.id = `group-${g.id}`;
+  card.style.cssText = `border-left:4px solid ${p.color};`;
+
+  const header = document.createElement("div");
+  header.className = "group-header";
+
+  const labelInput = document.createElement("input");
+  labelInput.type = "text";
+  labelInput.className = "group-label-input";
+  labelInput.value = g.label;
+  labelInput.style.color = p.color;
+  labelInput.addEventListener("input", e => { g.label = e.target.value; updateResult(); });
+  labelInput.addEventListener("keydown", e => { if (e.key === "Tab") { e.preventDefault(); handleTab(g.id); } });
+
+  const weightGroup = document.createElement("div");
+  weightGroup.className = "weight-group";
+  const wLabel = document.createElement("span");
+  wLabel.className = "weight-label";
+  wLabel.textContent = "waga:";
+
+  const weightInput = document.createElement("input");
+  weightInput.type = "number";
+  weightInput.className = "weight-input";
+  weightInput.value = g.weight.toFixed(3);
+  weightInput.min = 0; weightInput.step = 0.001;
+  weightInput.style.color = p.color;
+  weightInput.style.borderBottomColor = p.color + "80";
+  weightInput.addEventListener("input", e => {
+    let v = parseFloat(e.target.value);
+    if (isNaN(v) || v < 0) v = 0;
+    g.weight = Math.round(v * 1000) / 1000;
+    updateWeightBadge(g.id);
+    updateResult();
+  });
+  weightInput.addEventListener("keydown", e => { if (e.key === "Tab") { e.preventDefault(); handleTab(g.id); } });
+
+  const badge = document.createElement("div");
+  badge.className = "badge";
+  badge.id = `badge-${g.id}`;
+  badge.style.cssText = `background:${p.bg};color:${p.color};border:1px solid ${p.border}`;
+  badge.textContent = `${(g.weight * 100).toFixed(1)}%`;
+
+  const editHint = document.createElement("span");
+  editHint.className = "weight-edit-hint";
+  editHint.textContent = "✎";
+  editHint.title = "Kliknij aby edytować wagę";
+
+  weightGroup.appendChild(wLabel);
+  weightGroup.appendChild(weightInput);
+  weightGroup.appendChild(editHint);
+  weightGroup.appendChild(badge);
+
+  const stats = document.createElement("div");
+  stats.className = "group-stats";
+  stats.id = `stats-${g.id}`;
+
+  const removeBtn = document.createElement("button");
+  removeBtn.className = "remove-btn";
+  removeBtn.title = "Usuń grupę";
+  removeBtn.textContent = "×";
+  removeBtn.onclick = () => removeGroup(g.id);
+
+  header.appendChild(labelInput);
+  header.appendChild(weightGroup);
+  header.appendChild(stats);
+  header.appendChild(removeBtn);
+  card.appendChild(header);
+
+  const valGrid = document.createElement("div");
+  valGrid.className = "values-grid";
+  valGrid.id = `values-${g.id}`;
+  card.appendChild(valGrid);
+
+  return card;
+}
+
+function updateWeightBadge(gid) {
+  const g = groups.find(g => g.id === gid);
+  if (!g) return;
+  const el = document.getElementById(`badge-${gid}`);
+  if (el) el.textContent = `${(g.weight * 100).toFixed(1)}%`;
+}
+
+function fullRender() {
+  const container = document.getElementById("groups");
+  container.innerHTML = "";
+  groups.forEach(g => {
+    container.appendChild(renderGroupCard(g));
+    renderGroupValues(g.id);
+  });
+  updateRemoveBtns();
+  updateResult();
+}
+
+function updateRemoveBtns() {
+  document.querySelectorAll(".remove-btn").forEach(btn => {
+    btn.style.display = groups.length > 1 ? "flex" : "none";
+  });
+}
+
+document.getElementById("add-group-btn").addEventListener("click", () => {
+  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const label = "Grupa " + (letters[groups.length] || (groups.length + 1));
+  groups.push({ id: nextId++, label, weight: 0.100, values: [] });
+  const g = groups[groups.length - 1];
+  document.getElementById("groups").appendChild(renderGroupCard(g));
+  renderGroupValues(g.id);
+  updateRemoveBtns();
+  updateResult();
+  setTimeout(() => {
+    const inp = document.querySelector(`#values-${g.id} .val-input`);
+    if (inp) inp.focus();
+  }, 50);
+});
+
+function removeGroup(gid) {
+  if (groups.length <= 1) return;
+  groups = groups.filter(g => g.id !== gid);
+  document.getElementById(`group-${gid}`)?.remove();
+  updateRemoveBtns();
+  updateResult();
+}
+
+function clearAll() {
+  groups.forEach(g => { g.values = []; });
+  groups.forEach(g => renderGroupValues(g.id));
+  updateResult();
+}
+
+fullRender();
+</script>
+</body>
+</html>
